@@ -27,23 +27,25 @@ setup:
 port := '8000'
 
 # Start development server - auto-reload enabled
-dev port=port:
+start-dev port=port:
   @echo "🚀 Starting development server on port {{port}}..."
-  uv run fastapi dev --reload-dir . --reload-dir {{justfile_directory()}}/src/api --host 0.0.0.0 --port {{port}} 
+  uv run fastapi dev --entrypoint "api.main:app" --reload-dir {{justfile_directory()}}/src/api --port {{port}}
 
-# Start production server
-prod port=port:
-  @echo "🚀 Starting production server on port {{port}}..."
-  uv run fastapi run --host 0.0.0.0 --port {{port}} 
+# Start production server - no auto-reload, optimized for performance. Reads .env for configuration.
+start-prod:
+  @echo "🚀 Starting production server..."
+  uv run python -m api.main
 
 # -----------------------------------------------------------------------------
 # Testing
 # -----------------------------------------------------------------------------
 
+# Run all tests in the src/api directory
 test:
   uv run pytest {{justfile_directory()}}/src/api
 
-test-cov:
+# Run tests with coverage report (terminal + HTML)
+test-coverage:
   uv run pytest --cov=src --cov=api --cov-report=term-missing --cov-report=html
 
 # -----------------------------------------------------------------------------
